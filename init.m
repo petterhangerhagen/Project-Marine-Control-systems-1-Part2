@@ -60,5 +60,5 @@ Ki = [3e6 3e6 1e6]; % Ki = [ki_surge ki_sway ki_yaw];
 t_set = 800;
 dt = 0.1;   
 
-%sim("part1.slx");
+%sim("part2.slx");
 
