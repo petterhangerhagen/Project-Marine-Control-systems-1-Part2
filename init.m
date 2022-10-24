@@ -56,9 +56,39 @@ Ki = [3e6 3e6 1e6]; % Ki = [ki_surge ki_sway ki_yaw];
 % Ki = [1.1e4 1.35e4 5.9e6]; % Ki = [ki_surge ki_sway ki_yaw];
 
 
+%% Passive nonlinear observer
+
+% Mass matrix
+M = [6.8177e6 0 0; 0 7.8784e6 -2.5955e6; 0 -2.5955e6 3.57e9];
+
+% Damping matrix
+D = [2.6486e5 0 0; 0 8.8164e5 0; 0 0 3.3774e8];
+
+T = diag([1000,1000,1000]);
+
+% Tuning of wave-estimator
+T_i = 10; % Ti should be in the interval from 5s to 20s.
+omega_i = 2*pi/T_i;
+
+% zeta_i should be in the interval from 0.05 to 0.10
+zeta1 = 0.05;
+zeta2 = 0.075;
+zeta3 = 0.10;
+
+% Aw
+Aw = [0 0 0 1 0 0;
+    0 0 0 0 1 0;
+    0 0 0 0 0 1;
+    -diag([omega_i,omega_i,omega_i]).^2 -2*diag([zeta1,zeta2,zeta3])*diag([omega_i,omega_i,omega_i])];
+
+% Cw
+Cw = [0 0 0 1 0 0;
+    0 0 0 0 1 0;
+    0 0 0 0 0 1];
+
+
 %% Simulation
 t_set = 800;
 dt = 0.1;   
-
 %sim("part2.slx");
 
