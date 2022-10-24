@@ -10,11 +10,11 @@ eta0 = [0,0,0,0,0,0]';
 nu0 = [0,0,0,0,0,0]';
 
 %% Current 
-V_c = 0; % Currrent magnitude
+V_c = 0.5; % Currrent magnitude
 beta_c = 135; % Current angle degrees
 
 %% Lineary varying current angle
-switch_condition = 1; % 0: constant, 1: lineary varying 
+switch_condition = 0; % 0: constant, 1: lineary varying 
 
 %% Setpoints and simulations
 % Need to change the current magnitude, current angle and switch condition
@@ -46,9 +46,13 @@ satMax = [3 3 0.05];
 
 
 %% Tunning of controller
+% Kp = [0.009e7 0.017e7 7e7]; % Kp = [kp_surge kp_sway kp_yaw];
+% Kd = [0.0007e8 0.0011e8 5.5908e8]; % Kd = [kd_surge kd_sway kd_yaw];
+% Ki = [0.0044e5 0.0141e5 2.342e5]; % Ki = [ki_surge ki_sway ki_yaw];
+
 Kp = [4e7 4e7 2e8]; % Kp = [kp_surge kp_sway kp_yaw];
 Kd = [7e6 7e6 1e9]; % Kd = [kd_surge kd_sway kd_yaw];
-Ki = [3e6 3e6 1e6]; % Ki = [ki_surge ki_sway ki_yaw];
+Ki = [1e6 3e6 1e6]; % Ki = [ki_surge ki_sway ki_yaw];
 
 % Initial tuning values
 % Kp = [1.1e5 1.35e5 5.9e7]; % Kp = [kp_surge kp_sway kp_yaw];
@@ -67,7 +71,7 @@ D = [2.6486e5 0 0; 0 8.8164e5 0; 0 0 3.3774e8];
 T = diag([1000,1000,1000]);
 
 % Tuning of wave-estimator
-T_i = 10; % Ti should be in the interval from 5s to 20s.
+T_i = 20; % Ti should be in the interval from 5s to 20s.
 omega_i = 2*pi/T_i;
 
 % zeta_i should be in the interval from 0.05 to 0.10
@@ -85,6 +89,34 @@ Aw = [0 0 0 1 0 0;
 Cw = [0 0 0 1 0 0;
     0 0 0 0 1 0;
     0 0 0 0 0 1];
+
+% Cut off frequency - Should be bigger than natural frequency 1.25-1.3*omega_n 
+omega_ci = 1.25*omega_i; 
+
+% 
+zeta_ni = 1;
+zeta_i = 0.1;
+
+% Tuning of gain matrices
+% k1, k2, k3
+k_1 = -2*(zeta_ni - zeta_i)*omega_ci/omega_i;
+[k_2, k_3] = deal(k_1,k_1);
+
+% k4, k5, k6
+k_4 = 2*omega_i*(zeta_ni - zeta_i);
+[k_5, k_6] = deal(k_4,k_4);
+
+% k7, k8, k9
+[k_7,k_8,k_9] = deal(omega_ci);
+
+K1 = [diag([k_1,k_2,k_3]);
+    diag([k_4,k_5,k_6])];
+
+K2 = diag([k_7,k_8,k_9]);
+
+K4 = diag([0.1 0.1 0.01]);
+
+K3 = 0.1*K4;
 
 
 %% Simulation
