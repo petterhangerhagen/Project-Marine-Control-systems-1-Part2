@@ -59,7 +59,6 @@ Ki = [1e6 3e6 1e6]; % Ki = [ki_surge ki_sway ki_yaw];
 % Kd = [1.23e6 1.5e6 6.6e8]; % Kd = [kd_surge kd_sway kd_yaw];
 % Ki = [1.1e4 1.35e4 5.9e6]; % Ki = [ki_surge ki_sway ki_yaw];
 
-
 %% Passive nonlinear observer
 
 % Mass matrix
@@ -68,10 +67,11 @@ M = [6.8177e6 0 0; 0 7.8784e6 -2.5955e6; 0 -2.5955e6 3.57e9];
 % Damping matrix
 D = [2.6486e5 0 0; 0 8.8164e5 0; 0 0 3.3774e8];
 
+% Bias time constants
 T = diag([1000,1000,1000]);
 
 % Tuning of wave-estimator
-T_i = 20; % Ti should be in the interval from 5s to 20s.
+T_i = 10; % Ti should be in the interval from 5s to 20s.
 omega_i = 2*pi/T_i;
 
 % zeta_i should be in the interval from 0.05 to 0.10
@@ -93,7 +93,7 @@ Cw = [0 0 0 1 0 0;
 % Cut off frequency - Should be bigger than natural frequency 1.25-1.3*omega_n 
 omega_ci = 1.25*omega_i; 
 
-% 
+% Tuning parameters
 zeta_ni = 1;
 zeta_i = 0.1;
 
@@ -109,18 +109,69 @@ k_4 = 2*omega_i*(zeta_ni - zeta_i);
 % k7, k8, k9
 [k_7,k_8,k_9] = deal(omega_ci);
 
-K1 = [diag([k_1,k_2,k_3]);
+
+K1 = [diag([k_1,k_2,k_3]);  % works good with multipling by 0.005 ?
     diag([k_4,k_5,k_6])];
 
 K2 = diag([k_7,k_8,k_9]);
 
-K4 = diag([0.1 0.1 0.01]);
+K4 = diag([diag(M)]); % should be proprional to the mass of each componentet on recomadation from Dong
 
-K3 = 0.1*K4;
+K3 = 0.05*K4;  % shoud be from be in the interval [0.01, 0.1]
+
+
+%% Extended kalman filter
+
+% Aw, T, M, D, Cw 
+
+% Ew, Eb, Q, R, H
+
+% Design matrix
+H = [Cw eye(3) zeros(3) zeros(3)];
+
+B = [zeros(6,3); zeros(3); zeros(3); inv(M)];
+
+Kw = diag([1,1,1]);
+
+% Disturbance matrix
+Ew = [zeros(3); Kw];
+
+% Bias diagonal scaling matrix
+Eb = eye(3);
+
+% Disturbance matrix for kalman filter
+E = [Ew zeros(6,3);
+    zeros(3) zeros(3);
+    zeros(3) Eb;
+    zeros(3) zeros(3)];
+
+% tuning matrix
+Q = eye(6);
+R = eye(3);
+
+n = 15;
+I = eye(15);
+
+% Initial values
+x0 = zeros(1,15);
+P0 = eye(15);
 
 
 %% Simulation
 t_set = 800;
 dt = 0.1;   
 %sim("part2.slx");
+
+
+%% Kladd
+syms yaw
+
+R = [cos(yaw) -sin(yaw) 0;
+    sin(yaw) cos(yaw) 0;
+    0 0 1];
+
+df = diff(R,yaw);
+
+subs(R,yaw,pi);
+
 
