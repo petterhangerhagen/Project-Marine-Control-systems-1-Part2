@@ -10,7 +10,7 @@ eta0 = [0,0,0,0,0,0]';
 nu0 = [0,0,0,0,0,0]';
 
 %% Current 
-V_c = 0.5; % Currrent magnitude
+V_c = 0; % Currrent magnitude
 beta_c = 135; % Current angle degrees
 
 %% Lineary varying current angle
@@ -51,8 +51,12 @@ satMax = [3 3 0.05];
 % Ki = [0.0044e5 0.0141e5 2.342e5]; % Ki = [ki_surge ki_sway ki_yaw];
 
 Kp = [4e7 4e7 2e8]; % Kp = [kp_surge kp_sway kp_yaw];
-Kd = [7e6 7e6 1e9]; % Kd = [kd_surge kd_sway kd_yaw];
-Ki = [1e6 3e6 1e6]; % Ki = [ki_surge ki_sway ki_yaw];
+Kd = [7e12 7e6 1e9]; % Kd = [kd_surge kd_sway kd_yaw];
+Ki = [1e3 3e6 1e6]; % Ki = [ki_surge ki_sway ki_yaw];
+
+% Kp = [4e7 4e7 2e8]; % Kp = [kp_surge kp_sway kp_yaw];
+% Kd = [7e6 7e6 1e9]; % Kd = [kd_surge kd_sway kd_yaw];
+% Ki = [1e6 3e6 1e6]; % Ki = [ki_surge ki_sway ki_yaw];
 
 % Initial tuning values
 % Kp = [1.1e5 1.35e5 5.9e7]; % Kp = [kp_surge kp_sway kp_yaw];
@@ -68,7 +72,7 @@ M = [6.8177e6 0 0; 0 7.8784e6 -2.5955e6; 0 -2.5955e6 3.57e9];
 D = [2.6486e5 0 0; 0 8.8164e5 0; 0 0 3.3774e8];
 
 % Bias time constants
-T = diag([1000,1000,1000]);
+Tb = diag([1000,1000,1000]);
 
 % Tuning of wave-estimator
 T_i = 10; % Ti should be in the interval from 5s to 20s.
@@ -145,9 +149,13 @@ E = [Ew zeros(6,3);
     zeros(3) Eb;
     zeros(3) zeros(3)];
 
-% tuning matrix
-Q = eye(6);
-R = eye(3);
+%% tuning matrix
+q11 = 0.001; q22 = 0.001; q33 = 0.001;
+q44 = 1e6; q55 = 5e6; q66 = 1e9;
+Q_tun = diag([q11, q22, q33, q44, q55, q66]);
+
+r11 = 0.01; r22 = 0.01; r33 = 0.001;
+R_tun = diag([r11, r22, r33]);
 
 n = 15;
 I = eye(15);
@@ -162,16 +170,5 @@ t_set = 800;
 dt = 0.1;   
 %sim("part2.slx");
 
-
-%% Kladd
-syms yaw
-
-R = [cos(yaw) -sin(yaw) 0;
-    sin(yaw) cos(yaw) 0;
-    0 0 1];
-
-df = diff(R,yaw);
-
-subs(R,yaw,pi);
 
 
