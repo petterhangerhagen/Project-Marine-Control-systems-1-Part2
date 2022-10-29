@@ -164,14 +164,14 @@ dt = 0.1;
 
 
 %% Kladd
-syms yaw
-
-R = [cos(yaw) -sin(yaw) 0;
-    sin(yaw) cos(yaw) 0;
-    0 0 1];
-
-df = diff(R,yaw);
-
-subs(R,yaw,pi);
+% syms yaw
+% 
+% R = [cos(yaw) -sin(yaw) 0;
+%     sin(yaw) cos(yaw) 0;
+%     0 0 1];
+% 
+% df = diff(R,yaw);
+% 
+% subs(R,yaw,pi);
 
 
