@@ -9,12 +9,26 @@ eta0 = [0,0,0,0,0,0]';
 % Initial velocity u, v, w, p, q, r
 nu0 = [0,0,0,0,0,0]';
 
+%% Enviormental loads
 %% Current 
-V_c = 0; % Currrent magnitude
-beta_c = 135; % Current angle degrees
+V_c = 0.2; % Currrent magnitude
+beta_c = 270; % Current angle degrees, going to this direction
+% beta_c = 135; % Current angle degrees
 
-%% Lineary varying current angle
+% Lineary varying current angle
 switch_condition = 0; % 0: constant, 1: lineary varying 
+
+%% Wind
+%Set wind variables
+Uz = 10; % Mean wind velocity
+mu = 0.001; % Slow varying component wind model
+mu_angle = 0.001; % Slow varying component wind angle, higher to prevent as much "walk"
+windDirection = 180; % Set wind direction (NED-frame angle) [Degrees]
+
+%% Waves
+Hs = 2.5; % Significant wave height [m]
+Tp = 9; % Peak wave period [s]
+mean_wave_dir = 225; % Mean wave direction in degrees [degrees]
 
 %% Setpoints and simulations
 % Need to change the current magnitude, current angle and switch condition
@@ -149,8 +163,7 @@ E = [Ew zeros(6,3);
     zeros(3) Eb;
     zeros(3) zeros(3)];
 
-
-%% tuning matrix
+% tuning matrix 
 q11 = 1; q22 = 1; q33 = 0.2*pi/180;
 q44 = 100; q55 = 100; q66 = 100;
 Q_tun = diag([q11, q22, q33, q44, q55, q66])*1e12;
@@ -167,9 +180,9 @@ P0 = eye(15);
 
 
 %% Simulation
-t_set = 800;
+t_set = 300;
 dt = 0.1;   
-%sim("part2.slx");
+% sim("part2.slx");
 
 
 
