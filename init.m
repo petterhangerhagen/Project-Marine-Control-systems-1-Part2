@@ -46,17 +46,17 @@ satMax = [3 3 0.05];
 
 
 %% Tunning of controller
-Kp = [0.009e7 0.017e7 7e7]; % Kp = [kp_surge kp_sway kp_yaw];
-Kd = [0.0007e8 0.0011e8 5.5908e8]; % Kd = [kd_surge kd_sway kd_yaw];
-Ki = [0.0044e5 0.0141e5 2.342e5]; % Ki = [ki_surge ki_sway ki_yaw];
+% Kp = [0.009e7 0.017e7 7e7]; % Kp = [kp_surge kp_sway kp_yaw];
+% Kd = [0.0007e8 0.0011e8 5.5908e8]; % Kd = [kd_surge kd_sway kd_yaw];
+% Ki = [0.0044e5 0.0141e5 2.342e5]; % Ki = [ki_surge ki_sway ki_yaw];
 
 % Kp = [1e6 1.35e5 5.90e7]; % Kp = [kp_surge kp_sway kp_yaw];
 % Kd = [7e6 1.50e6 6.60e8]; % Kd = [kd_surge kd_sway kd_yaw];
 % Ki = [1e4 1.35e4 5.90e6]; % Ki = [ki_surge ki_sway ki_yaw];
 
-% Kp = [4e7 4e7 2e8]; % Kp = [kp_surge kp_sway kp_yaw];
-% Kd = [7e6 7e6 1e9]; % Kd = [kd_surge kd_sway kd_yaw];
-% Ki = [1e6 3e6 1e6]; % Ki = [ki_surge ki_sway ki_yaw];
+Kp = [4e6 4e6 2e8]; % Kp = [kp_surge kp_sway kp_yaw];
+Kd = [7e6 7e6 1e9]; % Kd = [kd_surge kd_sway kd_yaw];
+Ki = [1e3 3e5 1e6]; % Ki = [ki_surge ki_sway ki_yaw];
 
 % Initial tuning values
 % Kp = [1.1e5 1.35e5 5.9e7]; % Kp = [kp_surge kp_sway kp_yaw];
@@ -149,12 +149,13 @@ E = [Ew zeros(6,3);
     zeros(3) Eb;
     zeros(3) zeros(3)];
 
-%% tuning matrix
-q11 = 1e3; q22 = 1e3; q33 = 0;
-q44 = 0; q55 = 0; q66 = 1;
-Q_tun = diag([q11, q22, q33, q44, q55, q66]);
 
-r11 = 1; r22 = 1; r33 = 1;
+%% tuning matrix
+q11 = 1; q22 = 1; q33 = 0.2*pi/180;
+q44 = 100; q55 = 100; q66 = 100;
+Q_tun = diag([q11, q22, q33, q44, q55, q66])*1e12;
+
+r11 = 10; r22 = 10; r33 = 0.001*pi/180;
 R_tun = diag([r11, r22, r33]);
 
 n = 15;
