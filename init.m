@@ -68,14 +68,18 @@ satMax = [3 3 0.05];
 % Kd = [7e6 1.50e6 6.60e8]; % Kd = [kd_surge kd_sway kd_yaw];
 % Ki = [1e4 1.35e4 5.90e6]; % Ki = [ki_surge ki_sway ki_yaw];
 
-Kp = [4e6 4e6 2e8]; % Kp = [kp_surge kp_sway kp_yaw];
-Kd = [7e6 7e6 1e9]; % Kd = [kd_surge kd_sway kd_yaw];
-Ki = [1e3 3e5 1e6]; % Ki = [ki_surge ki_sway ki_yaw];
+% Kp = [4e6 4e6 2e8]; % Kp = [kp_surge kp_sway kp_yaw];
+% Kd = [7e6 7e6 1e9]; % Kd = [kd_surge kd_sway kd_yaw];
+% Ki = [1e3 3e5 1e6]; % Ki = [ki_surge ki_sway ki_yaw];
 
 % Initial tuning values
 % Kp = [1.1e5 1.35e5 5.9e7]; % Kp = [kp_surge kp_sway kp_yaw];
 % Kd = [1.23e6 1.5e6 6.6e8]; % Kd = [kd_surge kd_sway kd_yaw];
 % Ki = [1.1e4 1.35e4 5.9e6]; % Ki = [ki_surge ki_sway ki_yaw];
+
+Kp = [1.1e5 1.35e5 5.9e7]; % Kp = [kp_surge kp_sway kp_yaw];
+Kd = [1.23e6 1.5e6 6.6e8]; % Kd = [kd_surge kd_sway kd_yaw];
+Ki = [1.1e2 1.35e5 5.9e2]; % Ki = [ki_surge ki_sway ki_yaw];
 
 %% Passive nonlinear observer
 
@@ -89,7 +93,7 @@ D = [2.6486e5 0 0; 0 8.8164e5 0; 0 0 3.3774e8];
 Tb = diag([1000,1000,1000]);
 
 % Tuning of wave-estimator
-T_i = 6; % Ti should be in the interval from 5s to 20s.
+T_i = 10; % Ti should be in the interval from 5s to 20s.
 omega_i = 2*pi/T_i;
 
 % zeta_i should be in the interval from 0.05 to 0.10
@@ -164,11 +168,11 @@ E = [Ew zeros(6,3);
     zeros(3) zeros(3)];
 
 % tuning matrix 
-q11 = 1; q22 = 1; q33 = 0.2*pi/180;
-q44 = 100; q55 = 100; q66 = 100;
-Q_tun = diag([q11, q22, q33, q44, q55, q66])*1e12;
+q11 = 0.1; q22 = 0.1; q33 = 1*pi/180;
+q44 = 1e6; q55 = 5e6; q66 = 1e9;
+Q_tun = diag([q11, q22, q33, q44, q55, q66]);
 
-r11 = 10; r22 = 10; r33 = 0.001*pi/180;
+r11 = 0.1; r22 = 0.1; r33 = 0.001*pi/180;
 R_tun = diag([r11, r22, r33]);
 
 n = 15;
@@ -178,9 +182,24 @@ I = eye(15);
 x0 = zeros(1,15);
 P0 = eye(15);
 
+%% Thrust Allocation
+Thrusters = thrusters([1 2 3 4 5]);
+
+l1 = Thrusters(1).xposition;
+l2 = Thrusters(2).xposition;
+lx3 = Thrusters(3).xposition;
+ly4 = Thrusters(4).yposition;
+lx4 = Thrusters(4).xposition;
+ly5 = Thrusters(5).yposition;
+lx5 = thrusters(5).xposition;
+
+% Extended Thrust Configuration Matrix, T
+T_e = [0 0 1 0 1 0 1 0;
+       1 1 0 1 0 1 0 1;
+       l1 l2 0 lx3 -ly4 lx4 -ly5 lx5];
 
 %% Simulation
-t_set = 300;
+t_set = 400;
 dt = 0.1;   
 % sim("part2.slx");
 
