@@ -60,9 +60,14 @@ satMax = [3 3 0.05];
 
 
 %% Tunning of controller
-% Kp = [0.009e7 0.017e7 7e7]; % Kp = [kp_surge kp_sway kp_yaw];
-% Kd = [0.0007e8 0.0011e8 5.5908e8]; % Kd = [kd_surge kd_sway kd_yaw];
-% Ki = [0.0044e5 0.0141e5 2.342e5]; % Ki = [ki_surge ki_sway ki_yaw];
+Kp = [0.01e7 0.017e7 7e6]; % Kp = [kp_surge kp_sway kp_yaw];
+Kd = 10*[0.0007e8 0.0011e8 5.5908e8]; % Kd = [kd_surge kd_sway kd_yaw];
+Ki = 0.01*[0.0044e5 0.0141e5 2.342e5]; % Ki = [ki_surge ki_sway ki_yaw];
+
+% Kp = [0.009e7 1.35e5 7e7]; % Kp = [kp_surge kp_sway kp_yaw];
+% Kd = [0.0007e8 1.5e6 5.5908e8]; % Kd = [kd_surge kd_sway kd_yaw];
+% Ki = [0.0044e5 1.60e4 2.342e5]; % Ki = [ki_surge ki_sway ki_yaw];
+
 
 % Kp = [1e6 1.35e5 5.90e7]; % Kp = [kp_surge kp_sway kp_yaw];
 % Kd = [7e6 1.50e6 6.60e8]; % Kd = [kd_surge kd_sway kd_yaw];
@@ -77,9 +82,9 @@ satMax = [3 3 0.05];
 % Kd = [1.23e6 1.5e6 6.6e8]; % Kd = [kd_surge kd_sway kd_yaw];
 % Ki = [1.1e4 1.35e4 5.9e6]; % Ki = [ki_surge ki_sway ki_yaw];
 
-Kp = [1.1e5 1.35e5 5.9e7]; % Kp = [kp_surge kp_sway kp_yaw];
-Kd = [1.23e6 1.5e6 6.6e8]; % Kd = [kd_surge kd_sway kd_yaw];
-Ki = [1.1e2 1.35e5 5.9e2]; % Ki = [ki_surge ki_sway ki_yaw];
+% Kp = [1.1e5 1.35e5 5.9e7]; % Kp = [kp_surge kp_sway kp_yaw];
+% Kd = [1.23e6 1.5e6 6.6e8]; % Kd = [kd_surge kd_sway kd_yaw];
+% Ki = [1.6e2 1.60e4 5.9e2]; % Ki = [ki_surge ki_sway ki_yaw];
 
 %% Passive nonlinear observer
 
@@ -198,8 +203,43 @@ T_e = [0 0 1 0 1 0 1 0;
        1 1 0 1 0 1 0 1;
        l1 l2 0 lx3 -ly4 lx4 -ly5 lx5];
 
+Thrusters = thrusters([1 2 3 4 5]);
+
+a1 = Thrusters(1).initangle;
+a2 = Thrusters(2).initangle;
+a3 = Thrusters(3).initangle;
+a4 = Thrusters(4).initangle;
+a5 = Thrusters(5).initangle;
+
+
+xpos = [Thrusters(1).xposition Thrusters(2).xposition Thrusters(3).xposition Thrusters(4).xposition Thrusters(5).xposition]  ;
+ypos = [Thrusters(1).yposition Thrusters(2).yposition Thrusters(3).yposition Thrusters(4).yposition Thrusters(5).yposition]  ;
+
+
+ Bal = [0 0 1 0 1 0 1 0
+    1 1 0 1 0 1 0 1
+    xpos(1) xpos(2) xpos(3) ypos(3) xpos(4) ypos(4) xpos(5) ypos(5)];
+
+
+%Weighting:
+
+W = diag([0.391 0.391 0.4688 0.4688 1 1 1 1]);
+%pinv_B = inv(W)*Bal'*inv(Bal*inv(W)*Bal');
+pinv_B = pinv(Bal);
+
+
+%% Thurst allocation
+% 
+% x_thr = [39.3 35.6 31.3 -28.5 -28.5];
+% y_thr = [0 0 0 5 -5];
+% 
+% B = [0 0 0 1 0 1 0 1;
+%     1 1 1 0 1 0 1 0;
+%     x_thr(1) x_thr(2) x_thr(3) 0 x_thr(4) y_thr(4) x_thr(5) y_thr(5)];
+% 
+
 %% Simulation
-t_set = 400;
+t_set = 1000;
 dt = 0.1;   
 % sim("part2.slx");
 
