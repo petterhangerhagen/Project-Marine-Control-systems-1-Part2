@@ -60,13 +60,17 @@ satMax = [3 3 0.05];
 
 
 %% Tunning of controller
-Kp = [0.01e7 0.017e7 7e6]; % Kp = [kp_surge kp_sway kp_yaw];
-Kd = 10*[0.0007e8 0.0011e8 5.5908e8]; % Kd = [kd_surge kd_sway kd_yaw];
-Ki = 0.01*[0.0044e5 0.0141e5 2.342e5]; % Ki = [ki_surge ki_sway ki_yaw];
+% Kp = [0.01e7 0.017e7 7e6]; % Kp = [kp_surge kp_sway kp_yaw];
+% Kd = 10*[0.0007e8 0.0011e8 5.5908e8]; % Kd = [kd_surge kd_sway kd_yaw];
+% Ki = 0.01*[0.0044e5 0.0141e5 2.342e5]; % Ki = [ki_surge ki_sway ki_yaw];
 
-% Kp = [0.009e7 1.35e5 7e7]; % Kp = [kp_surge kp_sway kp_yaw];
-% Kd = [0.0007e8 1.5e6 5.5908e8]; % Kd = [kd_surge kd_sway kd_yaw];
-% Ki = [0.0044e5 1.60e4 2.342e5]; % Ki = [ki_surge ki_sway ki_yaw];
+% Kp = [1.0e5 1.7e5 7.0e8]; % Kp = [kp_surge kp_sway kp_yaw];
+% Kd = [7.0e5 1.1e6 5.6e9]; % Kd = [kd_surge kd_sway kd_yaw];
+% Ki = [4.4e0 11.4e1 2.4e4]; % Ki = [ki_surge ki_sway ki_yaw];
+
+Kp = [1.0e5 1.0e5 7.0e8]; % Kp = [kp_surge kp_sway kp_yaw];
+Kd = [7.0e5 1.1e6 5.6e9]; % Kd = [kd_surge kd_sway kd_yaw];
+Ki = [4.4e0 11.4e1 2.4e4]; % Ki = [ki_surge ki_sway ki_yaw];
 
 
 % Kp = [1e6 1.35e5 5.90e7]; % Kp = [kp_surge kp_sway kp_yaw];
@@ -98,7 +102,7 @@ D = [2.6486e5 0 0; 0 8.8164e5 0; 0 0 3.3774e8];
 Tb = diag([1000,1000,1000]);
 
 % Tuning of wave-estimator
-T_i = 10; % Ti should be in the interval from 5s to 20s.
+T_i = 9; % Ti should be in the interval from 5s to 20s.
 omega_i = 2*pi/T_i;
 
 % zeta_i should be in the interval from 0.05 to 0.10
@@ -144,7 +148,7 @@ K2 = diag([k_7,k_8,k_9]);
 
 K4 = diag([diag(M)]); % should be proprional to the mass of each componentet on recomadation from Dong
 
-K3 = 0.05*K4;  % shoud be from be in the interval [0.01, 0.1]
+K3 = 0.1*K4;  % shoud be from be in the interval [0.01, 0.1]
 
 
 %% Extended kalman filter
@@ -156,7 +160,7 @@ K3 = 0.05*K4;  % shoud be from be in the interval [0.01, 0.1]
 % Design matrix
 H = [Cw eye(3) zeros(3) zeros(3)];
 
-B = [zeros(6,3); zeros(3); zeros(3); inv(M)];
+B_k = [zeros(6,3); zeros(3); zeros(3); inv(M)];
 
 Kw = diag([1,1,1]);
 
@@ -174,10 +178,13 @@ E = [Ew zeros(6,3);
 
 % tuning matrix 
 q11 = 0.1; q22 = 0.1; q33 = 1*pi/180;
-q44 = 1e6; q55 = 5e6; q66 = 1e9;
+% q11 = 0.0001; q22 = 0.0001; q33 = 0.001*pi/180;
+% q44 = 1e6; q55 = 5e6; q66 = 1e9;
+q44 = 1e7; q55 = 1e7; q66 = 1e10;
 Q_tun = diag([q11, q22, q33, q44, q55, q66]);
 
-r11 = 0.1; r22 = 0.1; r33 = 0.001*pi/180;
+% r11 = 0.1; r22 = 0.1; r33 = 0.001*pi/180;
+r11 = 1; r22 = 1; r33 = 1;
 R_tun = diag([r11, r22, r33]);
 
 n = 15;
@@ -187,21 +194,21 @@ I = eye(15);
 x0 = zeros(1,15);
 P0 = eye(15);
 
-%% Thrust Allocation
-Thrusters = thrusters([1 2 3 4 5]);
-
-l1 = Thrusters(1).xposition;
-l2 = Thrusters(2).xposition;
-lx3 = Thrusters(3).xposition;
-ly4 = Thrusters(4).yposition;
-lx4 = Thrusters(4).xposition;
-ly5 = Thrusters(5).yposition;
-lx5 = thrusters(5).xposition;
-
-% Extended Thrust Configuration Matrix, T
-T_e = [0 0 1 0 1 0 1 0;
-       1 1 0 1 0 1 0 1;
-       l1 l2 0 lx3 -ly4 lx4 -ly5 lx5];
+% %% Thrust Allocation
+% Thrusters = thrusters([1 2 3 4 5]);
+% 
+% l1 = Thrusters(1).xposition;
+% l2 = Thrusters(2).xposition;
+% lx3 = Thrusters(3).xposition;
+% ly4 = Thrusters(4).yposition;
+% lx4 = Thrusters(4).xposition;
+% ly5 = Thrusters(5).yposition;
+% lx5 = thrusters(5).xposition;
+% 
+% % Extended Thrust Configuration Matrix, T
+% T_e = [0 0 1 0 1 0 1 0;
+%        1 1 0 1 0 1 0 1;
+%        l1 l2 0 lx3 -ly4 lx4 -ly5 lx5];
 
 Thrusters = thrusters([1 2 3 4 5]);
 
@@ -229,14 +236,14 @@ pinv_B = pinv(Bal);
 
 
 %% Thurst allocation
-% 
-% x_thr = [39.3 35.6 31.3 -28.5 -28.5];
-% y_thr = [0 0 0 5 -5];
-% 
-% B = [0 0 0 1 0 1 0 1;
-%     1 1 1 0 1 0 1 0;
-%     x_thr(1) x_thr(2) x_thr(3) 0 x_thr(4) y_thr(4) x_thr(5) y_thr(5)];
-% 
+
+x_thr = [39.3 35.6 31.3 -28.5 -28.5];
+y_thr = [0 0 0 5 -5];
+
+B = [0 0 0 1 0 1 0 1;
+    1 1 1 0 1 0 1 0;
+    x_thr(1) x_thr(2) x_thr(3) 0 x_thr(4) y_thr(4) x_thr(5) y_thr(5)];
+
 
 %% Simulation
 t_set = 1000;
